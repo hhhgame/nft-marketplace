@@ -110,23 +110,25 @@ export async function fetchTrendingCollections({
       collections,
       continuation: data.next || null,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string; stack?: string }
+    
     console.error('OpenSea API Error:', {
-      message: error?.message,
-      name: error?.name,
-      stack: error?.stack,
+      message: err?.message,
+      name: err?.name,
+      stack: err?.stack,
       fullError: error,
     })
     
-    if (error?.message?.includes('401') || error?.message?.includes('invalid')) {
+    if (err?.message?.includes('401') || err?.message?.includes('invalid')) {
       throw new Error('OpenSea API Key is invalid. Please check your API Key in .env.local')
     }
     
-    if (error?.message?.includes('429') || error?.message?.includes('rate limit')) {
+    if (err?.message?.includes('429') || err?.message?.includes('rate limit')) {
       throw new Error('OpenSea API rate limit exceeded. Please try again later.')
     }
     
-    throw new Error(`OpenSea API Error: ${error?.message || 'Unknown error'}`)
+    throw new Error(`OpenSea API Error: ${err?.message || 'Unknown error'}`)
   }
 }
 

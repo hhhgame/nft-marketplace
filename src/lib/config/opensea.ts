@@ -281,6 +281,119 @@ export interface TrendingCollectionsResponse {
   continuation: string | null
 }
 
+export type EventType = 'sale' | 'transfer' | 'mint' | 'cancel' | 'order'
+
+export interface OpenSeaEvent {
+  event_type: EventType
+  order_hash: string | null
+  chain: string
+  event_timestamp: number | null
+  transaction: {
+    hash: string
+    timestamp: string
+    block_number: number
+  } | null
+  payment: {
+    quantity: string
+    token_address: string
+    decimals: number
+    symbol: string
+  } | null
+  nft: {
+    identifier: string
+    collection: string
+    contract: string
+    token_standard: string
+    name: string | null
+    description: string | null
+    image_url: string | null
+    metadata_url: string | null
+    opensea_url: string | null
+    updated_at: string | null
+    is_disabled: boolean
+    is_nsfw: boolean
+  } | null
+  collection: string
+  from_address: string | null
+  to_address: string | null
+  created_date: string
+  quantity: number
+}
+
+export interface OpenSeaEventsResponse {
+  asset_events: OpenSeaEvent[]
+  next: string | null
+}
+
+export interface Event {
+  id: string
+  type: EventType
+  collection: string
+  nft: {
+    identifier: string
+    name: string | null
+    imageUrl: string | null
+    openseaUrl: string | null
+  } | null
+  transaction: {
+    hash: string
+    timestamp: string
+    blockNumber: number
+  } | null
+  payment: {
+    quantity: string
+    symbol: string
+    decimals: number
+    formattedAmount: number
+  } | null
+  fromAddress: string | null
+  toAddress: string | null
+  createdAt: string
+  eventTimestamp: number | null
+  quantity: number
+  chain: string
+}
+
+export function transformOpenSeaEvent(
+  openSeaEvent: OpenSeaEvent,
+  index: number
+): Event {
+  const payment = openSeaEvent.payment
+  let formattedAmount = 0
+  if (payment) {
+    formattedAmount = parseInt(payment.quantity) / Math.pow(10, payment.decimals)
+  }
+
+  return {
+    id: `${openSeaEvent.created_date}-${index}`,
+    type: openSeaEvent.event_type,
+    collection: openSeaEvent.collection,
+    nft: openSeaEvent.nft ? {
+      identifier: openSeaEvent.nft.identifier,
+      name: openSeaEvent.nft.name,
+      imageUrl: openSeaEvent.nft.image_url,
+      openseaUrl: openSeaEvent.nft.opensea_url,
+    } : null,
+    transaction: openSeaEvent.transaction ? {
+      hash: openSeaEvent.transaction.hash,
+      timestamp: openSeaEvent.transaction.timestamp,
+      blockNumber: openSeaEvent.transaction.block_number,
+    } : null,
+    payment: payment ? {
+      quantity: payment.quantity,
+      symbol: payment.symbol,
+      decimals: payment.decimals,
+      formattedAmount,
+    } : null,
+    fromAddress: openSeaEvent.from_address,
+    toAddress: openSeaEvent.to_address,
+    createdAt: openSeaEvent.created_date,
+    eventTimestamp: openSeaEvent.event_timestamp,
+    quantity: openSeaEvent.quantity,
+    chain: openSeaEvent.chain,
+  }
+}
+
 export function transformOpenSeaCollection(
   openSeaCollection: OpenSeaCollection,
   chain: ChainKey = 'ethereum'
