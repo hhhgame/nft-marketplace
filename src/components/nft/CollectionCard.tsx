@@ -1,7 +1,7 @@
 'use client'
 
+import Link from 'next/link'
 import { type Collection } from '@/lib/config/nftscan'
-import { formatEther } from 'viem'
 
 interface CollectionCardProps {
   collection: Collection
@@ -9,7 +9,7 @@ interface CollectionCardProps {
 }
 
 export function CollectionCard({ collection, rank }: CollectionCardProps) {
-  const { name, image, floorAsk, volume, volumeChange, tokenCount, ownerCount, symbol } = collection
+  const { name, image, floorAsk, volume, volumeChange, tokenCount, ownerCount, symbol, slug } = collection
   
   const floorPrice = floorAsk?.price?.amount?.native
   const volume1Day = volume?.['1day']
@@ -27,8 +27,8 @@ export function CollectionCard({ collection, rank }: CollectionCardProps) {
     return count.toLocaleString()
   }
   
-  return (
-    <div className="group bg-slate-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 cursor-pointer">
+  const cardContent = (
+    <div className="group bg-slate-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
       <div className="relative">
         {rank !== undefined && (
           <div className="absolute top-3 left-3 z-10 w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
@@ -106,4 +106,14 @@ export function CollectionCard({ collection, rank }: CollectionCardProps) {
       </div>
     </div>
   )
+
+  if (slug) {
+    return (
+      <Link href={`/collections/${slug}`} className="block">
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return cardContent
 }
